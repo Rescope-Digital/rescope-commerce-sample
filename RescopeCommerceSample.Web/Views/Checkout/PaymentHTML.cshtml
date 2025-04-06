@@ -1,0 +1,22 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<CheckoutOrderViewModel>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Rescope.Commerce.Web.Models;
+@{
+    Layout = "Checkout/_Layout";
+}
+
+<div class="bg-white shadow-md border border-neutral-200 p-4 mb-4">
+    @Html.Raw(ViewData.GetPaymentHTML())
+</div> 
+
+<script>
+    @* Append the order number to the URL just in case the user refreshes the page *@
+    const currentUrl = window.location.href,
+        separator = (currentUrl.indexOf("?") === -1) ? "?" : "&",
+        newParam = separator + "orderId=@System.Web.HttpUtility.UrlEncode(Model.Order.OrderNumber)&idHash=@System.Web.HttpUtility.UrlEncode(Model.Order.GetIdHash())";
+
+    let newUrl = currentUrl.replace(newParam, "");
+    newUrl += newParam;
+    window.history.replaceState({}, '', newUrl);
+</script>

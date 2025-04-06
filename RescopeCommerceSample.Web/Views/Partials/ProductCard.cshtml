@@ -1,0 +1,51 @@
+﻿@model RescopeProduct
+@inject IBasketService basketService
+@inject IStockService stockService
+@{
+    var basket = await basketService.GetOrCreateCurrentBasket(Html.GetStoreId());
+    var overallPrice = Model.Price?.Get(basket);
+    var variants = Model.Children<RescopeProductVariant>();
+    var allSkus = variants.Select(x => x.Sku).ToList();
+    allSkus.Add(Model.Sku);
+    var inStock = await stockService.GetTotalStock(allSkus, 1) > 0;
+}
+
+<div class="z-0 flex flex-col items-end relative group">
+    <a href="@Model.Url()" title="@Model.Name" class="absolute z-20 inset-0"></a>
+    <img class="-z-10 shadow-sm w-full mb-2 h-auto aspect-square object-contain" src="@Model.Image.Url()" />
+    <p class="z-10 w-full font-bold group-hover:text-indigo-700 transition-all">@Model.Name</p>
+    @if (overallPrice != null)
+    {
+        <p class="z-10 w-full text-sm opacity-60 group-hover:text-indigo-700 transition-all">@overallPrice?.FinalPriceFormatted</p>
+    }
+    else if (variants.Any())
+    {
+        var prices = new List<ProductPrice>();
+        foreach (var variant in variants)
+        {
+            var p = variant.Price?.Get(basket);
+            if (p != null)
+            {
+                prices.Add(p);
+            }
+        }
+
+        prices = prices
+                .OrderBy(x => x.FinalPrice)
+                .ToList();
+
+        if (prices.Any())
+        {
+            <p class="z-10 w-full text-sm opacity-60 group-hover:text-indigo-700 transition-all">
+                <span>@prices.First().FinalPriceFormatted</span>
+                <span class="opacity-50"> - </span>
+                <span>@prices.Last().FinalPriceFormatted</span>
+
+                @if (!inStock)
+                {
+                    <span> - <span class="text-red-600">Out of stock</span></span>
+                }
+            </p>
+        }
+    }
+</div>

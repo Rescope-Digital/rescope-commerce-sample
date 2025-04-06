@@ -1,0 +1,31 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<CheckoutViewModel<CheckoutShippingModel>> 
+@using Rescope.Commerce.Web.Models;
+@{ 
+    Layout = "Checkout/_Layout";
+}
+@using (Html.BeginUmbracoForm<CheckoutSurfaceController>(nameof(CheckoutSurfaceController.UpdateShipping), null, new
+{
+    @Class = "basketForm"
+}))
+{
+    <div class="bg-white shadow-md border border-neutral-200 p-4 mb-4">
+        <h2 class="text-xl font-medium mb-2">Shipping method</h2>
+
+        @foreach (var calculation in Model.CheckoutModel.ShippingCalculationInfos)
+        {
+            <div class="bg-white py-2 px-3 mt-3 z-0 relative">
+                <input type="radio" class="peer hidden" name="method" value="@calculation.Method.Id" id="@calculation.Method.Id" />
+                <p class="font-medium -mb-0.5">@calculation.Method.Name - <span class="text-right font-bold">@calculation.Calculation.FinalPriceFormatted</span></p>
+                <p class="opacity-50 text-sm">@calculation.Method.Description</p>
+                <div class="absolute top-0 right-0 h-full w-0 transition-all peer-checked:w-2 bg-indigo-600"></div>
+                <label class="absolute cursor-pointer inset-0 transition-all border border-neutral-200 peer-checked:border-indigo-600" for="@calculation.Method.Id"></label>
+            </div>
+        }
+    </div>
+
+    <div class="flex justify-end gap-4">
+        <button type="submit" class="checkout-btn checkout-btn-green">
+            Continue
+        </button>
+    </div>
+}

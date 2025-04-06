@@ -1,0 +1,199 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.RescopeProduct>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@inject IStockService stockService
+@inject IBasketService basketService
+@{
+    Layout = "Master.cshtml";
+    var stock = await stockService.GetStockInfo(Model.Sku);
+    var variants = Model.Children<RescopeProductVariant>();
+    var basket = await basketService.GetOrCreateCurrentBasket(Html.GetStoreId());
+    var currency = basket.Currency.Name;
+    var inBasket = basket.BasketLineItems.Where(x => x.ProductSku == Model.Sku || variants.Any(y => y.Sku == x.ProductSku)).Sum(x => x.Quantity);
+}
+
+<div class="container lg:!max-w-screen-lg mx-auto py-12 grid grid-cols-12 gap-8">
+
+    <div class="col-span-6 z-0 bg-white border border-neutral-100 flex items-end aspect-square relative overflow-hidden group">
+        <img class="-z-10 w-full h-full absolute inset-0 object-contain" src="@Model.Image.Url()" />
+    </div>
+
+    <div class="text-black rounded-2xl mb-4 col-span-6 h-full flex items-center">
+        <div>
+            <h1 class="text-3xl font-normal">
+                @Model.Name
+                @if (Model.IsSubscriptionItem)
+                {
+                    <span class="bg-blue-600 rounded px-1.5 py-0.5 text-white text-xs">Subscription</span>
+                }
+            </h1>
+            <div>
+                @Html.TruncateByWords(Model.Description?.ToHtmlString(), 20)
+            </div>
+
+            @using (Html.BeginUmbracoForm<BasketSurfaceController>(nameof(BasketSurfaceController.AddToBasket), null, new
+            {
+                @Class = "flex flex-col flex-1 mt-2"
+            }))
+            {
+                @if (variants.Any())
+                {
+                    <div class="w-full">
+                        <p class="text-sm opacity-75 mb-1.5">Options:</p>
+                        @{ var variantIdx = 0; }
+                        @foreach (var variant in variants)
+                        {
+                            variantIdx++;
+                            <div class="z-0 border border-neutral-200 rounded mb-2 px-4 py-2.5 w-full flex flex-row gap-2 relative transition-all hover:border-indigo-600">
+                                @if (variant.Price.HasCurrency(currency))
+                                {
+                                    var isInBasket = basket.BasketLineItems.Where(x => x.ProductSku == variant.Sku).Select(x => x.Quantity).Sum();
+                                    var variantPrice = variant.Price.Get(basket);
+                                    var price = variantPrice.FinalPrice;
+                                    var variantStock = await stockService.GetStockInfo(variant.Sku);
+                                    var stockLevel = (variantStock == null || variantStock.DisableTracking ? null : (int?)variantStock.StockLevel);
+
+                                    <input id="variant_@(variantIdx)" type="radio" class="hidden peer variantRadio" name="productSku" value="@variant.Sku" data-price="@variant.Price.Get(basket).FinalPrice" data-in-basket="@isInBasket" data-stock="@((variantStock == null || variantStock.DisableTracking || variantStock.ContinueSellingWithNoStock) ? "dis" : Math.Max(0, variantStock.StockLevel))" />
+                                    <div class="w-5 h-5 my-auto rounded-full flex items-center justify-center bg-white border border-neutral-400 text-transparent peer-checked:text-indigo-600 transition-all">
+                                        <div class="w-2 h-2 bg-[currentColor] rounded-full transition-all"></div>
+                                    </div>
+
+                                    <div class="flex-1">
+                                        <h2 class="font-bold flex items-center gap-1">
+                                            @variant.Name
+
+                                            @if (variant.IsSubscriptionItem)
+                                            {
+                                                <span class="bg-blue-600 rounded px-1.5 py-0.5 text-white text-xs">Subscription</span>
+                                            }
+                                        </h2>
+                                        <p class="text-sm text-black/75">
+                                            @if (isInBasket > 0)
+                                            {
+                                                <a href="@(Model.AncestorOrSelf(1).FirstChild<Basket>().Url())" class="hover:underline text-indigo-600 font-bold tracking-tight z-10 relative">
+                                                    <span class="value">@isInBasket</span> in basket
+                                                </a>
+                                            }
+                                            @if (stockLevel != null)
+                                            {
+                                                if (stockLevel.Value <= 0)
+                                                {
+                                                    if (variantStock.ContinueSellingWithNoStock)
+                                                    {
+                                                        <span class="text-red-600">Out of stock, available to order</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-red-600">Out of stock</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span>@stockLevel in stock</span>
+                                                }
+                                            }
+                                        </p>
+                                    </div>
+                                    <p class="text-end">
+                                        @variantPrice.FinalPriceFormatted
+                                        @if (variant.IsSubscriptionItem)
+                                        {
+                                            <br />
+                                            <span class="block opacity-75 -mt-1 text-xs leading-tight">
+                                                @variant.GetSubscriptionPeriod()
+                                            </span>
+                                        }
+                                    </p>
+                                }
+                                else
+                                {
+                                    <input id="variant_@(variantIdx)" type="radio" class="hidden peer variantRadio" name="productSku" value="@variant.Sku" />
+                                    <div class="flex-1">
+                                        <h2 class="font-bold flex items-center gap-1">
+                                            @variant.Name
+
+                                            @if (variant.IsSubscriptionItem)
+                                            {
+                                                <span class="bg-blue-600 rounded px-1.5 py-0.5 text-white text-xs">Subscription</span>
+                                            }
+                                        </h2>
+                                    </div>
+                                    <p class="opacity-75">Unavailable</p>
+                                }
+                                <label for="variant_@(variantIdx)" class="z-0 absolute inset-0 cursor-pointer"></label>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    var price = Model.Price.Get(basket);
+                    <p class="mr-4 text-xl mb-1.5">
+                        @price.FinalPriceFormatted
+
+                        @if (Model.IsSubscriptionItem)
+                        {
+                            <br />
+                            <span class="block opacity-75 -mt-1 text-xs leading-tight">
+                                @Model.GetSubscriptionPeriod()
+                            </span>
+                        }
+                    </p>
+                    @if (inBasket > 0)
+                    {
+                        <a href="@(Model.AncestorOrSelf(1).FirstChild<Basket>().Url())" class="hover:underline block -mt-1.5 mb-1.5 text-indigo-600 font-bold tracking-tight z-10 relative">
+                            <span class="value">@inBasket</span> in basket
+                        </a>
+                    }
+                    <input type="hidden" name="productSku" value="@Model.Sku" />
+                }
+
+                <div class="flex flex-row items-center flex-wrap gap-y-2 mt-1.5">
+                    @if (variants.Any() || stock == null || stock.StockLevel > 0 || stock.ContinueSellingWithNoStock)
+                    {
+                        <button type="submit" class="addtobasket @(variants.Any() ? "hidden" : "") bg-indigo-600 mr-4 text-white flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-indigo-600/25 transition-all hover:bg-white hover:text-indigo-600 border border-indigo-600">
+                            <i class="bi bi-bag"></i>
+                            Add to basket
+                        </button>
+                    }
+
+                    @if (!variants.Any())
+                    {
+                        var stockLevel = (stock == null || stock.DisableTracking ? null : (int?)stock.StockLevel);
+                        if (stockLevel != null)
+                        {
+                            <p class="opacity-75 text-sm">
+                                @if (stockLevel.Value <= 0)
+                                {
+                                    if (stock.ContinueSellingWithNoStock)
+                                    {
+                                        <span class="text-red-600">Out of stock, available to order</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red-600">Out of stock</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>@stockLevel in stock</span>
+                                }
+                            </p>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+
+    <div class="text-black col-span-12 h-full flex items-center">
+        <div>
+            @Model.Description
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="/js/product.js"></script>
+}

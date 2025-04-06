@@ -1,0 +1,110 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<CheckoutViewModel<CheckoutDetailsModel>> 
+@using Rescope.Commerce.Web.Models;   
+@inject ICountryService countryService 
+@{
+    Layout = "Checkout/_Layout";
+    var basket = Model.Basket;
+    var checkout = Model.CheckoutModel;
+    var countries = (await countryService.List(basket.StoreId)).Items.Where(x => x.Enabled);
+}
+
+@using (Html.BeginUmbracoForm<CheckoutSurfaceController>(nameof(CheckoutSurfaceController.UpdateAddress), null, new
+{
+    @Class = "basketForm"
+}))
+{
+    @if (TempData.ContainsKey("showDetailsErrors") && basket.Errors.Any())
+    {
+        <ul class="mb-4 pl-6 list-disc">
+            @foreach (var error in basket.Errors)
+            {
+                <li class="text-red-600 text-sm">@error.Message</li>
+            }
+        </ul>
+    }
+
+    <div class="bg-white shadow-md border border-neutral-200 p-4 mb-4">
+        <h2 class="text-xl font-medium mb-2">Contact details</h2>
+
+        <div class="flex gap-4 flex-col">
+            <div class="flex gap-4">
+                <input class="input flex-1" placeholder="Email" asp-for="@checkout.Email" readonly="@Model.IsLoggedIn" />
+                <input class="input flex-1" placeholder="Phone" asp-for="@checkout.Phone" />
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md border border-neutral-200 p-4 mb-4">
+        <h2 class="text-xl font-medium mb-2">Delivery address</h2>
+
+        <div class="flex gap-4 flex-col">
+            <div class="flex gap-4">
+                <input class="input flex-1" placeholder="First name" asp-for="@checkout.DeliveryAddress!.FirstName" />
+                <input class="input flex-1" placeholder="Last name" asp-for="@checkout.DeliveryAddress!.LastName" />
+            </div>
+            <div class="flex gap-4">
+                <input class="input flex-1" placeholder="Company (optional)" asp-for="@checkout.DeliveryAddress!.CompanyName" />
+            </div>
+            <div class="flex gap-4">
+                <input class="input flex-1" placeholder="Address" asp-for="@checkout.DeliveryAddress!.AddressLine1" />
+            </div>
+            <div class="flex gap-4">
+                <input class="input flex-1" placeholder="City" asp-for="@checkout.DeliveryAddress!.City" />
+                <input class="input flex-1" placeholder="Postcode" asp-for="@checkout.DeliveryAddress!.PostCode" />
+            </div>
+
+            <select class="ns" asp-for="@checkout.DeliveryAddress!.Country">
+                <option value="" data-display="Select">Select country</option>
+                @foreach (var country in countries)
+                {
+                    <option value="@country.Code">
+                        @country.Name
+                    </option> 
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md border border-neutral-200 p-4 mb-4">
+        <h2 class="text-xl font-medium mb-2">Billing address</h2>
+
+        <div class="">
+            <input id="default-checkbox" checked type="checkbox" value="true" asp-for="@checkout.BillingAddressSameAsDelivery" class="peer w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+            <label for="default-checkbox" class="ms-2 text-sm font-medium text-neutral-600">Same as delivery</label>
+
+            <div class="flex gap-4 flex-col mt-2 peer-checked:hidden flex-1">
+                <div class="flex gap-4">
+                    <input class="input flex-1" placeholder="First name" asp-for="@checkout.BillingAddress!.FirstName" />
+                    <input class="input flex-1" placeholder="Last name" asp-for="@checkout.BillingAddress!.LastName" />
+                </div>
+                <div class="flex gap-4">
+                    <input class="input flex-1" placeholder="Company (optional)" asp-for="@checkout.BillingAddress!.CompanyName" />
+                </div>
+                <div class="flex gap-4">
+                    <input class="input flex-1" placeholder="Address" asp-for="@checkout.BillingAddress!.AddressLine1" />
+                </div>
+                <div class="flex gap-4">
+                    <input class="input flex-1" placeholder="City" asp-for="@checkout.BillingAddress!.City" />
+                    <input class="input flex-1" placeholder="Postcode" asp-for="@checkout.BillingAddress!.PostCode" />
+                </div>
+
+                <select class="ns" asp-for="@checkout.BillingAddress!.Country">
+                    <option value="" data-display="Select">Select country</option>
+                    @foreach (var country in countries)
+                    {
+                        <option value="@country.Code">
+                            @country.Name
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end items-center gap-4">
+        <p class="text-xs">Shipping is calculated on the next step</p>
+        <button type="submit" class="checkout-btn checkout-btn-green">
+            Continue
+        </button>
+    </div>
+}

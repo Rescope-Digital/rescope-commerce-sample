@@ -1,0 +1,36 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Home>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@inject IBasketService basketService
+@inject IStockService stockService
+@{
+    Layout = "Master.cshtml";
+
+    var catalogues = Model.Children<Catalogue>();
+    var basket = await basketService.GetOrCreateCurrentBasket(Html.GetStoreId());
+}
+
+<div class="container lg:!max-w-screen-lg mx-auto pt-12">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold">@Model.Name</h1>
+        <p class="">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+    </div>
+</div>
+
+@{ var idx = 0;}
+@foreach (var catalogue in catalogues)
+{
+    <div class="mb-8 @(++idx % 2 == 0 ? "bg-neutral-50 py-6" : "")">
+        <div class="container lg:!max-w-screen-lg mx-auto">
+            <h2 class="text-2xl font-bold mb-4"><a href="@catalogue.Url()" class="hover:underline transition-all hover:text-indigo-700">@catalogue.Name <i class="bi bi-arrow-right-short"></i></a></h2>
+            <div class="grid grid-cols-4 gap-4">
+                @foreach (var product in catalogue.Children<RescopeProduct>().Take(3))
+                {
+                    @await Html.PartialAsync("ProductCard", product)
+                }
+            </div>
+        </div>
+    </div>
+} 

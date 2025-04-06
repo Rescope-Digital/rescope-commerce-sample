@@ -1,0 +1,19 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Catalogue>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@{
+    Layout = "Master.cshtml";
+}
+
+<div class="container lg:!max-w-screen-lg mx-auto py-12">
+    <div class="text-black mb-4">
+        <h1 class="text-2xl font-bold">@Model.Name</h1>
+    </div>
+
+    <div class="grid grid-cols-4 gap-4">
+        @foreach (var product in Model.Children<RescopeProduct>())
+        {
+            @await Html.PartialAsync("ProductCard", product)
+        }
+    </div>
+</div>

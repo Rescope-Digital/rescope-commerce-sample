@@ -1,0 +1,187 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Confirmation>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Rescope.Commerce.Core.Entities;
+@inject IProductStore productStore
+@inject IOrderService orderService
+@inject ISubscriptionService subscriptionService
+@{
+    Layout = "Master.cshtml";
+    var basket = await orderService.GetByNumber(Context.Request.Query["order"]);
+    var hasValidHash = Context.Request.Query["idHash"] == basket.GetIdHash();
+
+    var subscriptions = new List<Subscription>();
+    foreach (var sub in basket.CreatedSubscriptionInfos)
+    {
+        subscriptions.Add(await subscriptionService.Get(sub.Id));
+    }
+}
+
+<div class="container lg:!max-w-screen-lg mx-auto py-12">
+    <div class="text-black mb-4">
+        <h1 class="text-2xl font-bold">Your order #@basket.OrderNumber</h1>
+        @if (basket.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.PENDING || basket.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.NONE)
+        {
+            <p class="text-lg flex items-center gap-2 text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="animate-spin bi bi-arrow-repeat" viewBox="0 0 16 16">
+                    <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9" />
+                    <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z" />
+                </svg>
+                Pending payment...
+            </p>
+        }
+        else if (basket.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.AUTHORISED)
+        {
+            <p class="text-lg flex items-center gap-2 text-green-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0" />
+                </svg>
+                Payment authorised
+            </p>
+        }
+        else if (basket.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.PAID)
+        {
+            <p class="text-lg flex items-center gap-2 text-green-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0" />
+                </svg>
+                Payment complete
+            </p>
+        }
+        else if (basket.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.FAILED)
+        {
+            <p class="text-lg text-red-600">
+                Failed
+            </p>
+        }
+
+    </div>
+
+    @if (hasValidHash)
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 mb-4 gap-4">
+            <div class="text-sm bg-neutral-50 text-black rounded-2xl p-4">
+                <h2 class="font-bold text-lg leading-tight">Shipping address</h2>
+                <p>@basket.DeliveryAddress?.FirstName @basket.DeliveryAddress?.LastName</p>
+                @if (!string.IsNullOrEmpty(basket.DeliveryAddress?.CompanyName))
+                {
+                    <p>@basket.DeliveryAddress.CompanyName</p>
+                }
+                <p>@basket.DeliveryAddress?.AddressLine1</p>
+                <p>@basket.DeliveryAddress?.AddressLine2</p>
+                <p>@basket.DeliveryAddress?.City</p>
+                <p>@basket.DeliveryAddress?.PostCode</p>
+                <p>@basket.Phone</p>
+                <p>@basket.Email</p>
+            </div>
+            <div class="text-sm bg-neutral-50 text-black rounded-2xl p-4">
+                <h2 class="font-bold text-lg">Details</h2>
+                <p>@basket.ShippingMethod?.Name</p>
+                <p>@basket.PaymentMethod?.Name</p>
+            </div>
+        </div>
+    }
+
+
+    @if (subscriptions?.Any() == true)
+    {
+        <h2 class="text-2xl font-bold mb-4">Your new subscriptions</h2>
+
+        @foreach (var subscription in subscriptions)
+        {
+            <div class="text-sm bg-neutral-50 text-black rounded-2xl p-4 mb-4">
+                <p class="text-xl font-bold leading-tight">@subscription.TotalPriceFormatted</p>
+                <p class="border-b border-neutral-200 mb-2 pb-2 text-black/75 text-sm">every @subscription.RecurPeriod</p>
+                <div class="flex flex-row gap-4">
+                    @foreach (var lineItem in subscription.SubscriptionLineItems)
+                    {
+                        var product = await productStore.GetProductOrVariant(lineItem.ProductSku);
+                        <div class="w-28 relative">
+                            <div>
+                                <img class="aspect-square object-contain w-full rounded-md" src="@(product.Content().AncestorOrSelf<RescopeProduct>().Image.Url())" alt="@product.Name" />
+                            </div>
+                            @if (product is IProductVariant variant)
+                            {
+                                <p class="text-sm leading-tight tracking-tight font-bold"><a href="@(variant.Content().AncestorOrSelf<RescopeProduct>().Url())" class="hover:underline">@variant.Parent.Name</a></p>
+                                <p class="text-xs">@variant.Name</p>
+                            }
+                            else
+                            {
+                                <p class="text-sm leading-tight tracking-tight font-bold">@product.Name</p>
+                            }
+                            <a href="@(product.Content().AncestorOrSelf<RescopeProduct>().Url())" class="absolute inset-0"></a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+    <h2 class="text-2xl font-bold mb-4">In this order</h2>
+
+    @foreach (var item in basket.BasketLineItems)
+    {
+        var product = await productStore.GetProductOrVariant(item.ProductSku);
+        <div class="text-black mb-4 flex gap-8">
+            <div class="w-2/12">
+                <img class="aspect-square object-contain w-full" src="@(product.Content()?.AncestorOrSelf<RescopeProduct>()?.Image?.Url())" />
+            </div>
+            <div class="flex-1 flex items-center">
+                <div>
+                    @if (product is IProductVariant variant)
+                    {
+                        <h1 class="text-2xl font-bold"><a href="@(variant.Content()?.AncestorOrSelf<RescopeProduct>()?.Url())" class="hover:underline">@variant.Parent.Name</a></h1>
+                        <h2>@variant.Name</h2>
+                    }
+                    else
+                    {
+                        <h1 class="text-2xl font-bold">@product.Name</h1>
+                    }
+
+                    <div class="inline-flex mt-2 pr-2">
+                        <p>@(item.Quantity)x</p>
+                    </div>
+
+                    @item.TotalPriceFormatted
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="mb-3">
+        <div class="flex items-center gap-2 justify-end text-end">
+            <p class="opacity-50">Shipping</p>
+            <p class="text-lg font-medium opacity-60">@basket.ShippingPriceFormatted</p>
+        </div>
+        @if (basket.TotalTax > 0)
+        {
+            <div class="flex justify-end gap-2 mb-2">
+                <p class="opacity-50">Tax</p>
+                <p class="text-lg font-medium opacity-60">@basket.TotalTaxFormatted</p>
+            </div>
+        }
+        <div class="flex items-center gap-2 justify-end text-end">
+            <p class="opacity-75">Total</p>
+            <p class="text-lg font-medium">@basket.TotalPriceFormatted</p>
+        </div>
+    </div>
+</div>
+
+@if (basket.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.PENDING)
+{
+    <script>
+        var check;
+        check = () => {
+            fetch('/umbraco/surface/checkoutsurface/GetStatus?pageId=@Model.Id&orderId=@System.Web.HttpUtility.UrlEncode(basket.OrderNumber)').then(async c => {
+                if ((await c.text()) == 'PENDING') {
+                    setTimeout(check, 2000);
+                }
+                else {
+                     location.reload();
+                }
+            })
+        }
+
+        setTimeout(check, 1000);
+    </script>
+}

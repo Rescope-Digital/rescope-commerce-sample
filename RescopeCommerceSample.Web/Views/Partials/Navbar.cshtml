@@ -1,0 +1,51 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject IBasketService basketService
+@inject ICountryService countryService
+@{
+    var home = Model.AncestorOrSelf<Home>(1);
+    var basketPage = home.FirstChild<Basket>();
+    var basket = await basketService.GetOrCreateCurrentBasket(home.RescopeStore.Id);
+    var count = basket.BasketLineItems.Sum(x => x.Quantity);
+    var countries = (await countryService.List(basket.StoreId)).Items.Where(x => x.Enabled);
+}
+
+<div class="fixed top-0 left-0 z-[100] w-full h-20 bg-white border-b border-neutral-200">
+    <div class="container lg:!max-w-screen-lg mx-auto flex flex-row items-center h-full gap-1">
+        <a href="/" class="mr-6">
+            <img src="@home.Logo?.Url()?height=50" class="h-6" />
+        </a>
+
+        @foreach (var link in home.Navbar)
+        {
+            <a href="@link.Url" target="@link.Target" class="hover:text-indigo-600 transition-all h-full px-4 flex items-center relative group">
+                @link.Name
+
+                <div class="group-hover:w-full bottom-0 left-0 w-0 absolute h-1 bg-indigo-600 bg-gradient-to-r from-sky-500/50 transition-all"></div>
+            </a>
+        }
+
+        @using (Html.BeginUmbracoForm<BasketSurfaceController>(nameof(BasketSurfaceController.UpdateCountry), null, new
+        {
+            @Class = "ml-auto mr-2 flex items-center justify-center"
+        }))
+        {
+            <select class="ns border-none countryChanger" asp-for="@basket.DeliveryAddress.Country" id="countryChanger" name="country">
+                <option value="" data-display="Select">Select country</option>
+                @foreach (var country in countries)
+                {
+                    <option value="@country.Code">
+                        @country.Name
+                    </option>
+                }
+            </select>
+        }
+
+        <a href="@basketPage.Url()" class="  relative flex flex-row transition-all hover:text-indigo-600">
+            <i class="bi bi-bag text-xl"></i>
+            @if (count > 0)
+            {
+                <p class="absolute -bottom-0.5 -right-1.5 text-white w-4 h-4 text-[0.625rem] bg-indigo-600 rounded-full flex items-center justify-center">@count</p>
+            }
+        </a>
+    </div>
+</div>

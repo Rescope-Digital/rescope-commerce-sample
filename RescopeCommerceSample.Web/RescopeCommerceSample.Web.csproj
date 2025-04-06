@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>104931e6-0900-41f0-a582-d78c764ad606</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Umbraco.Cms" Version="13.7.2" />
+    <PackageReference Include="uSync" Version="13.2.7" />
+    <PackageReference Include="Rescope.Commerce" Version="13.2.8" />
+    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Square" Version="13.2.8" />
+    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Stripe" Version="13.2.8" />
+    <PackageReference Include="Rescope.Commerce.uSync" Version="13.2.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Opt-in to app-local ICU to ensure consistent globalization APIs across different platforms -->
+    <PackageReference Include="Microsoft.ICU.ICU4C.Runtime" Version="72.1.0.3" />
+    <RuntimeHostConfigurationOption Include="System.Globalization.AppLocalIcu" Value="72.1.0.3" Condition="$(RuntimeIdentifier.StartsWith('linux')) or $(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and !$([MSBuild]::IsOSPlatform('osx')))" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings-schema.Umbraco.Cms.json">
+      <DependentUpon>appsettings-schema.json</DependentUpon>
+    </Content>
+    <Content Update="appsettings-schema.usync.json">
+      <DependentUpon>appsettings-schema.json</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Helpers\" />
+    <None Remove="Views\Checkout\" />
+    <None Remove="Models\InnerCheckoutModels\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+    <Folder Include="Views\Checkout\" />
+    <Folder Include="Models\InnerCheckoutModels\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- Razor files are needed for the backoffice to work correctly -->
+    <CopyRazorGenerateFilesToPublishDirectory>true</CopyRazorGenerateFilesToPublishDirectory>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Remove RazorCompileOnBuild and RazorCompileOnPublish when not using ModelsMode InMemoryAuto -->
+    <RazorCompileOnBuild>false</RazorCompileOnBuild>
+    <RazorCompileOnPublish>false</RazorCompileOnPublish>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Umbraco.Web.UI' " />
+</Project>

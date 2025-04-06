@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply text-neutral-700;
+  }
+
+  html,
+  body {
+    @apply min-h-screen;
+  }
+
+  body {
+    @apply flex flex-col;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-black;
+  }
+
+  .nice-select {
+    border-radius: 0;
+    padding-left: 12px;
+  }
+}
+
+@layer utilities {
+  .input {
+    @apply border border-neutral-200 px-3 py-1.5 read-only:bg-neutral-100;
+  }
+}
+
+@layer components {
+  .checkout-btn-green {
+    @apply bg-green-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-green-600/25 transition-all hover:bg-white hover:text-green-600 border border-green-600;
+  }
+}
+
+select.ns {
+  margin: 0 !important;
+}

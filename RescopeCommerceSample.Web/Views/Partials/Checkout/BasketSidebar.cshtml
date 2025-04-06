@@ -1,0 +1,41 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject IBasketService basketService
+@inject IProductStore productStore
+@{
+    var basket = await basketService.GetOrCreateCurrentBasket(Html.GetStoreId());
+}
+
+<div class="bg-white shadow-md border border-neutral-200 p-4">
+    @foreach (var item in basket.BasketLineItems)
+    {
+        var product = await productStore.GetProductOrVariant(item.ProductSku);
+        <div class="flex gap-4 items-center mb-2.5">
+            <img class="w-14 h-14 border border-neutral-200 rounded" src="@(product.Content().AncestorOrSelf<RescopeProduct>().Image.Url())" />
+            <div class="flex-1">
+                <p class="text-neutral-600 text-base tracking-tight -mb-0.5 flex">
+                    @(product.Content().AncestorOrSelf<RescopeProduct>().Name)&nbsp;<span class="lowercase">x @(item.Quantity)</span>
+                    <span class="text-right ml-auto text-neutral-700 text-sm font-medium">@item.TotalPriceFormatted</span>
+                </p>
+                <p class="text-xs text-neutral-500 text-sm">@product.Name | @product.Sku</p>
+            </div>
+        </div>
+    }
+    <div class="mt-2 pt-2 border-t border-neutral-200">
+        <div class="flex justify-between mb-2">
+            <p class="text-sm text-neutral-600">Shipping</p>
+            <p class="text-sm text-neutral-700">@basket.TotalShippingPriceFormatted</p>
+        </div>
+        @if (basket.TotalTax > 0)
+        {
+            <div class="flex justify-between mb-2">
+                <p class="text-sm text-neutral-600">Tax</p>
+                <p class="text-sm text-neutral-700">@basket.TotalTaxFormatted</p>
+            </div>
+        }
+        <div class="flex justify-between mb-2">
+            <p class="text-base text-neutral-600">Total</p>
+            <p class="text-base text-neutral-700 font-medium">@basket.TotalPriceFormatted</p>
+        </div>
+    </div>
+</div>

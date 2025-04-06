@@ -1,0 +1,17 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels; 
+@{
+    // There may be better places to set the active store on a request.
+    // This will do for now.
+
+    // In this demo store, we hold a reference to the Rescope Commerce Store in the Home node
+    // this would allow for multiple different stores in one Umbraco installation.
+
+    if (Model is Umbraco.Cms.Core.Models.ContentModel contentModel)
+    {
+        Html.SetStore(contentModel.Content.AncestorOrSelf<Home>()?.RescopeStore);
+    }
+    else if (Model is IPublishedContent ipc)
+    {
+        Html.SetStore(ipc.AncestorOrSelf<Home>()?.RescopeStore);
+    }
+}

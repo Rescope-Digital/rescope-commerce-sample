@@ -1,0 +1,106 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<CheckoutViewModel<CheckoutLoginModel>>
+@using Rescope.Commerce.Web.Models; 
+@using Umbraco.Cms.Web.Common.Models
+@using Umbraco.Cms.Web.Common.Security
+@using Umbraco.Cms.Web.Website.Controllers 
+@using Umbraco.Extensions   
+@inject IMemberExternalLoginProviders memberExternalLoginProviders 
+@{
+    Layout = "Checkout/_Layout";
+    var basket = Model.Basket;
+
+    var loginModel = new LoginModel();
+    loginModel.RedirectUrl = Model.Url() + "?stage=details";
+}
+
+@if (ViewData.TryGetTwoFactorProviderNames(out var providerNames))
+{
+    foreach (var providerName in providerNames)
+    {
+        <div class="2fa-form">
+            <h4>Two factor with @providerName.</h4>
+            <div asp-validation-summary="All" class="text-danger"></div>
+            @using (Html.BeginUmbracoForm<UmbTwoFactorLoginController>(nameof(UmbTwoFactorLoginController.Verify2FACode)))
+            {
+
+                <text>
+                    <input type="hidden" name="provider" value="@providerName" />
+                    Input security code: <input name="code" value="" /><br />
+                    <button type="submit" class="btn btn-primary">Validate</button>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                </text>
+            }
+        </div>
+    }
+}
+else
+{
+    <div class="flex flex-col md:flex-row">
+        <div class="login-form flex-1">
+            @using (Html.BeginUmbracoForm<UmbLoginController>("HandleLogin", new { RedirectUrl = loginModel.RedirectUrl }))
+            {
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="mb-3">
+                    <input placeholder="Username" asp-for="@loginModel.Username" class="input w-full" />
+                    <span asp-validation-for="@loginModel.Username" class=""></span>
+                </div>
+                <div class="mb-1.5">
+                    <input placeholder="Password" asp-for="@loginModel.Password" class="input w-full" />
+                    <span asp-validation-for="@loginModel.Password" class="form-text text-danger"></span>
+                </div>
+                <div class="mb-3 form-check">
+                    <input asp-for="@loginModel.RememberMe" class="">
+                    <label asp-for="@loginModel.RememberMe" class="text-sm ml-1 opacity-75">
+                        Stay logged in
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button type="submit" class="bg-green-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-green-600/25 transition-all hover:bg-white hover:text-green-600 border border-green-600">Log in</button>
+
+                    <a class="underline text-sm" href="@Model.Url()?stage=register">Register</a>
+                </div>
+
+            }
+            @{
+                var loginProviders = await memberExternalLoginProviders.GetMemberProvidersAsync();
+                var externalSignInError = ViewData.GetExternalSignInProviderErrors();
+
+                if (loginProviders.Any())
+                {
+                    <hr />
+                    <h4>Or using external providers</h4>
+                    if (externalSignInError?.AuthenticationType is null && externalSignInError?.Errors.Any() == true)
+                    {
+                        @Html.DisplayFor(x => externalSignInError.Errors);
+                    }
+
+                    @foreach (var login in await memberExternalLoginProviders.GetMemberProvidersAsync())
+                    {
+
+                        @using (Html.BeginUmbracoForm<UmbExternalLoginController>(nameof(UmbExternalLoginController.ExternalLogin)))
+                        {
+                            <button type="submit" name="provider" value="@login.ExternalLoginProvider.AuthenticationType">
+                                Sign in with @login.AuthenticationScheme.DisplayName
+                            </button>
+
+                            if (externalSignInError?.AuthenticationType == login.ExternalLoginProvider.AuthenticationType)
+                            {
+                                @Html.DisplayFor(x => externalSignInError.Errors);
+                            }
+                        }
+                    }
+                }
+            }
+        </div>
+        @if (Model.CheckoutModel.AllowGuestCheckout)
+        {
+            <a href="@Model.Url()?stage=details" class="flex flex-1 flex-col p-4 border-l border-neutral-300 transition-all hover:text-indigo-600 items-center justify-center ml-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-basket-fill" viewBox="0 0 16 16">
+                    <path d="M5.071 1.243a.5.5 0 0 1 .858.514L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 6h1.717zM3.5 10.5a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0z" />
+                </svg>
+                <h2 class="mt-2">Guest checkout</h2>
+            </a>
+        }
+    </div>
+}
