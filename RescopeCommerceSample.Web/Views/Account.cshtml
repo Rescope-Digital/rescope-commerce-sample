@@ -25,10 +25,10 @@
         @foreach (var subscription in subscriptions.Items)
         {
             <div class="border p-4 mb-4">
-                <p class="text-xl font-bold leading-tight">@subscription.TotalPriceFormatted</p>
+                <h2 class="font-bold text-lg">@subscription.TotalPriceFormatted</h2>
                 @if (subscription.Enabled)
                 {
-                    <p class="text-black/75 text-sm">every @subscription.RecurPeriod - started @subscription.CreatedAt.ToString("dd/MM/yyyy") - @subscription.SubscriptionLineItems.Count() items</p>
+                    <p class="opacity-75 text-sm">every @subscription.RecurPeriod - started @subscription.CreatedAt.ToString("dd/MM/yyyy") - @subscription.SubscriptionLineItems.Count() items</p>
                 }
                 else
                 {
@@ -55,6 +55,18 @@
                         </div>
                     }
                 </div>
+
+                @if (subscription.Enabled)
+                {
+                    @using (Html.BeginUmbracoForm<AccountSurfaceController>(nameof(AccountSurfaceController.CancelSubscription), null, new
+                    {
+                        @Class = "flex"
+                    }))
+                    {
+                        <input type="hidden" name="subscriptionId" value="@subscription.Id" />
+                        <button type="submit" class="btn btn-danger ml-auto" href="#">Cancel subscription</button>
+                    }
+                }
             </div>
         }
     }
@@ -126,7 +138,7 @@
                 </div>
 
                 <div class="flex">
-                    <a class="bg-indigo-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white ml-auto inline-flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-indigo-600/25 transition-all hover:bg-white hover:text-indigo-600 border border-indigo-600" href="/basket/confirmation/?order=@order.OrderNumber&idHash=@order.GetIdHash()">Open order</a>
+                    <a class="btn btn-primary ml-auto" href="/basket/confirmation/?order=@order.OrderNumber&idHash=@order.GetIdHash()">Open order</a>
                 </div>
             </div>
         }

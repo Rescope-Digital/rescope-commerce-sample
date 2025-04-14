@@ -13,11 +13,12 @@ using Umbraco.Cms.Core.Web;
 using Umbraco.Cms.Infrastructure.Persistence;
 using Umbraco.Cms.Web.Common.Filters;
 using Umbraco.Cms.Web.Common.Security;
-using Umbraco.Cms.Web.Website.Models;
-using Umbraco.Extensions;
 
 namespace Umbraco.Cms.Web.Website.Controllers;
 
+/// <summary>
+/// Modified from https://github.com/umbraco/Umbraco-CMS/blob/7d9a2c6e701cf783b22ebfec82f5df59ea8f7e51/src/Umbraco.Web.Website/Controllers/UmbRegisterController.cs
+/// </summary>
 public class CustomRegisterController : SurfaceController
 {
     private readonly IMemberManager _memberManager;
