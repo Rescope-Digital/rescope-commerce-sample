@@ -1,10 +1,10 @@
 ﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<CheckoutViewModel<CheckoutLoginModel>>
-@using Rescope.Commerce.Web.Models; 
+@using Rescope.Commerce.Web.Models;
 @using Umbraco.Cms.Web.Common.Models
 @using Umbraco.Cms.Web.Common.Security
-@using Umbraco.Cms.Web.Website.Controllers 
-@using Umbraco.Extensions   
-@inject IMemberExternalLoginProviders memberExternalLoginProviders 
+@using Umbraco.Cms.Web.Website.Controllers
+@using Umbraco.Extensions
+@inject IMemberExternalLoginProviders memberExternalLoginProviders
 @{
     Layout = "Checkout/_Layout";
     var basket = Model.Basket;
@@ -35,7 +35,7 @@
 }
 else
 {
-    <div class="flex flex-col md:flex-row">
+    <div class="flex flex-col md:flex-row bg-white shadow-md border border-neutral-200 p-4 gap-4">
         <div class="login-form flex-1">
             @using (Html.BeginUmbracoForm<UmbLoginController>("HandleLogin", new { RedirectUrl = loginModel.RedirectUrl }))
             {
@@ -56,7 +56,9 @@ else
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <button type="submit" class="bg-green-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-green-600/25 transition-all hover:bg-white hover:text-green-600 border border-green-600">Log in</button>
+                    <button type="submit"
+                        class="bg-green-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-green-600/25 transition-all hover:bg-white hover:text-green-600 border border-green-600">Log
+                        in</button>
 
                     <a class="underline text-sm" href="@Model.Url()?stage=register">Register</a>
                 </div>
@@ -72,7 +74,8 @@ else
                     <h4>Or using external providers</h4>
                     if (externalSignInError?.AuthenticationType is null && externalSignInError?.Errors.Any() == true)
                     {
-                        @Html.DisplayFor(x => externalSignInError.Errors);
+                        @Html.DisplayFor(x => externalSignInError.Errors)
+                        ;
                     }
 
                     @foreach (var login in await memberExternalLoginProviders.GetMemberProvidersAsync())
@@ -86,7 +89,8 @@ else
 
                             if (externalSignInError?.AuthenticationType == login.ExternalLoginProvider.AuthenticationType)
                             {
-                                @Html.DisplayFor(x => externalSignInError.Errors);
+                                @Html.DisplayFor(x => externalSignInError.Errors)
+                                ;
                             }
                         }
                     }
@@ -95,9 +99,12 @@ else
         </div>
         @if (Model.CheckoutModel.AllowGuestCheckout)
         {
-            <a href="@Model.Url()?stage=details" class="flex flex-1 flex-col p-4 border-l border-neutral-300 transition-all hover:text-indigo-600 items-center justify-center ml-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-basket-fill" viewBox="0 0 16 16">
-                    <path d="M5.071 1.243a.5.5 0 0 1 .858.514L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 6h1.717zM3.5 10.5a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0z" />
+            <a href="@Model.Url()?stage=details"
+                class="flex flex-1 flex-col border-t md:border-t-0 pt-4 md:pt-0 md:border-l border-neutral-300 transition-all hover:text-indigo-600 items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-basket-fill"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M5.071 1.243a.5.5 0 0 1 .858.514L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 6h1.717zM3.5 10.5a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0z" />
                 </svg>
                 <h2 class="mt-2">Guest checkout</h2>
             </a>

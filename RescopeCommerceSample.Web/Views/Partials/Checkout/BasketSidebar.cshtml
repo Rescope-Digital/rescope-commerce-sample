@@ -17,7 +17,13 @@
                     @(product.Content().AncestorOrSelf<RescopeProduct>().Name)&nbsp;<span class="lowercase">x @(item.Quantity)</span>
                     <span class="text-right ml-auto text-neutral-700 text-sm font-medium">@item.TotalPriceFormatted</span>
                 </p>
-                <p class="text-xs text-neutral-500 text-sm">@product.Name | @product.Sku</p>
+                <p class="text-xs text-neutral-500 text-sm">
+                    @product.Name
+                    @if (product.IsSubscriptionItem)
+                    {
+                        <span class="bg-blue-600 rounded px-1 py-0.5 text-white text-[0.675rem]">Subscription</span>
+                    }
+                </p>
             </div>
         </div>
     }

@@ -476,4 +476,4 @@ umbraco/Data/TEMP/
 /umbraco/Logs/
 
 # Media files
-/wwwroot/media/
+# /wwwroot/media/

@@ -1,12 +1,12 @@
 ﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
-@inject IBasketService basketService
-@inject ICountryService countryService
+@inject IBasketService basketService 
 @{
-    var home = Model.AncestorOrSelf<Home>(1);
+    var home = Model.AncestorOrSelf<Home>(1)!;
     var basketPage = home.FirstChild<Basket>();
+    var accountPage = home.FirstChild<Account>();
     var basket = await basketService.GetOrCreateCurrentBasket(home.RescopeStore.Id);
-    var count = basket.BasketLineItems.Sum(x => x.Quantity);
-    var countries = (await countryService.List(basket.StoreId)).Items.Where(x => x.Enabled);
+    var basketCount = basket.BasketLineItems.Sum(x => x.Quantity);
+    var isLoggedIn = User?.Identity?.IsAuthenticated == true;
 }
 
 <div class="fixed top-0 left-0 z-[100] w-full h-20 bg-white border-b border-neutral-200">
@@ -24,27 +24,19 @@
             </a>
         }
 
-        @using (Html.BeginUmbracoForm<BasketSurfaceController>(nameof(BasketSurfaceController.UpdateCountry), null, new
-        {
-            @Class = "ml-auto mr-2 flex items-center justify-center"
-        }))
-        {
-            <select class="ns border-none countryChanger" asp-for="@basket.DeliveryAddress.Country" id="countryChanger" name="country">
-                <option value="" data-display="Select">Select country</option>
-                @foreach (var country in countries)
-                {
-                    <option value="@country.Code">
-                        @country.Name
-                    </option>
-                }
-            </select>
+        @await Html.PartialAsync("CountrySelector")
+
+        @if (isLoggedIn) {
+            <a href="@accountPage.Url()" class="relative flex flex-row transition-all hover:text-indigo-600 mr-2">
+                <i class="bi bi-person text-2xl"></i>
+            </a>
         }
 
-        <a href="@basketPage.Url()" class="  relative flex flex-row transition-all hover:text-indigo-600">
+        <a href="@basketPage.Url()" class="relative flex flex-row transition-all hover:text-indigo-600">
             <i class="bi bi-bag text-xl"></i>
-            @if (count > 0)
+            @if (basketCount > 0)
             {
-                <p class="absolute -bottom-0.5 -right-1.5 text-white w-4 h-4 text-[0.625rem] bg-indigo-600 rounded-full flex items-center justify-center">@count</p>
+                <p class="absolute -bottom-0.5 -right-1.5 text-white w-4 h-4 text-[0.625rem] bg-indigo-600 rounded-full flex items-center justify-center">@basketCount</p>
             }
         </a>
     </div>

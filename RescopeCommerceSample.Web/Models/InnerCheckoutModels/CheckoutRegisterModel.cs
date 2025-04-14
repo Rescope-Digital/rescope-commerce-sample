@@ -1,4 +1,5 @@
-﻿using Umbraco.Cms.Web.Website.Models;
+﻿using RescopeCommerceSample.Web.Models;
+using Umbraco.Cms.Web.Website.Models;
 
 namespace Rescope.Commerce.Web.Models
 {
@@ -6,7 +7,6 @@ namespace Rescope.Commerce.Web.Models
     {
         public CheckoutRegisterModel() { }
 
-
-        public RegisterModel RegisterModel { get; set; }
+        public CustomRegisterModel RegisterModel { get; set; }
     }
 }

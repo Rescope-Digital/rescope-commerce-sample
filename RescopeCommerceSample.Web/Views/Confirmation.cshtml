@@ -91,7 +91,14 @@
         {
             <div class="text-sm bg-neutral-50 text-black rounded-2xl p-4 mb-4">
                 <p class="text-xl font-bold leading-tight">@subscription.TotalPriceFormatted</p>
-                <p class="border-b border-neutral-200 mb-2 pb-2 text-black/75 text-sm">every @subscription.RecurPeriod</p>
+                @if (subscription.Enabled)
+                {
+                    <p class="border-b border-neutral-200 mb-2 pb-2 text-black/75 text-sm">every @subscription.RecurPeriod</p>
+                }
+                else
+                {
+                    <p class="border-b border-neutral-200 mb-2 pb-2 text-red-600 text-sm">Cancelled</p>
+                }
                 <div class="flex flex-row gap-4">
                     @foreach (var lineItem in subscription.SubscriptionLineItems)
                     {

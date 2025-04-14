@@ -1,0 +1,23 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject ICountryService countryService
+@inject IBasketService basketService
+@{
+    var basket = await basketService.GetOrCreateCurrentBasket(Model.AncestorOrSelf<Home>(1)!.RescopeStore!.Id);
+    var countries = (await countryService.List(basket.StoreId)).Items.Where(x => x.Enabled);
+}
+
+@using (Html.BeginUmbracoForm<BasketSurfaceController>(nameof(BasketSurfaceController.UpdateCountry), null, new
+{
+    @Class = "ml-auto mr-2 flex items-center justify-center"
+}))
+{
+    <select class="ns border-none countryChanger" asp-for="@basket.DeliveryAddress.Country" id="countryChanger" name="country">
+        <option value="" data-display="Select">Select country</option>
+        @foreach (var country in countries)
+        {
+            <option value="@country.Code">
+                @country.Name
+            </option>
+        }
+    </select>
+}

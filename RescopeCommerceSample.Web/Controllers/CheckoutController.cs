@@ -176,13 +176,7 @@ namespace RescopeCommerceSample.Web.Controllers
                         basket!,
                         new CheckoutRegisterModel()
                         {
-                            RegisterModel = _memberModelBuilderFactory
-                                .CreateRegisterModel() 
-                                .WithMemberTypeAlias(Constants.Conventions.MemberTypes.DefaultAlias) 
-                                .WithRedirectUrl(null) 
-                                .WithCustomProperties(false) 
-                                .WithAutomaticLogIn(true)
-                                .Build()
+                            RegisterModel = new CustomRegisterModel()
                         },
                         CurrentPage,
                         _publishedValueFallback));

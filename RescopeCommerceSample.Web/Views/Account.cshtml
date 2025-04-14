@@ -1,0 +1,134 @@
+﻿@using Umbraco.Cms.Core.Security
+@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Account>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@inject IOrderService orderService;
+@inject ISubscriptionService subscriptionService;
+@inject IProductStore productStore;
+@inject IMemberManager memberManager;
+@{
+    Layout = "Master.cshtml";
+    var member = await memberManager.GetCurrentMemberAsync();
+    var orders = await orderService.GetMemberPage(member, 1, null, sortBy: nameof(Subscription.CreatedAt));
+    var subscriptions = await subscriptionService.GetMemberPage(member, 1, null, sortBy: nameof(Subscription.CreatedAt));
+}
+
+
+<div class="container lg:!max-w-screen-lg mx-auto py-12">
+    <div class="text-black mb-4">
+        <h1 class="text-2xl font-bold">@Model.Name</h1>
+    </div>
+
+    @if (subscriptions.Items.Any())
+    {
+        <h2 class="text-xl mb-2 font-bold">Your subscriptions</h2>
+        @foreach (var subscription in subscriptions.Items)
+        {
+            <div class="border p-4 mb-4">
+                <p class="text-xl font-bold leading-tight">@subscription.TotalPriceFormatted</p>
+                @if (subscription.Enabled)
+                {
+                    <p class="text-black/75 text-sm">every @subscription.RecurPeriod - started @subscription.CreatedAt.ToString("dd/MM/yyyy") - @subscription.SubscriptionLineItems.Count() items</p>
+                }
+                else
+                {
+                    <p class="text-red-600 text-sm">Cancelled</p>
+                }
+                <div class="flex flex-row gap-4 mt-2">
+                    @foreach (var lineItem in subscription.SubscriptionLineItems)
+                    {
+                        var product = await productStore.GetProductOrVariant(lineItem.ProductSku);
+                        <div class="w-28 relative">
+                            <div>
+                                <img class="aspect-square object-contain w-full rounded-md" src="@(product.Content().AncestorOrSelf<RescopeProduct>().Image.Url())" alt="@product.Name" />
+                            </div>
+                            @if (product is IProductVariant variant)
+                            {
+                                <p class="text-sm leading-tight tracking-tight font-bold"><a href="@(variant.Content().AncestorOrSelf<RescopeProduct>().Url())" class="hover:underline">@variant.Parent.Name</a></p>
+                                <p class="text-xs">@variant.Name</p>
+                            }
+                            else
+                            {
+                                <p class="text-sm leading-tight tracking-tight font-bold">@product.Name</p>
+                            }
+                            <a href="@(product.Content().AncestorOrSelf<RescopeProduct>().Url())" class="absolute inset-0"></a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+    @if (orders.Items.Any())
+    {
+        <h2 class="text-xl mb-2 font-bold">Your orders</h2>
+        @foreach (var order in orders.Items)
+        {
+            <div class="border p-4 mb-4">
+                <h2 class="font-bold text-lg">Order #@order.OrderNumber</h2>
+                <p class="opacity-75 text-sm">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm") - @order.BasketLineItems.Count() items</p>
+
+                @if (order.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.PENDING || order.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.NONE)
+                {
+                    <p class="text-sm flex items-center gap-2 text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="animate-spin bi bi-arrow-repeat" viewBox="0 0 16 16">
+                            <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9" />
+                            <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z" />
+                        </svg>
+                        Pending payment...
+                    </p>
+                }
+                else if (order.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.AUTHORISED)
+                {
+                    <p class="text-sm flex items-center gap-2 text-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                            <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0" />
+                        </svg>
+                        Payment authorised
+                    </p>
+                }
+                else if (order.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.PAID)
+                {
+                    <p class="text-sm flex items-center gap-2 text-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2" viewBox="0 0 16 16">
+                            <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0" />
+                        </svg>
+                        Payment complete
+                    </p>
+                }
+                else if (order.PaymentStatus == Rescope.Commerce.Core.Entities.PaymentStatus.FAILED)
+                {
+                    <p class="text-sm text-red-600">
+                        Failed
+                    </p>
+                }
+
+                <div class="flex flex-row gap-4 mt-2">
+                    @foreach (var lineItem in order.BasketLineItems)
+                    {
+                        var product = await productStore.GetProductOrVariant(lineItem.ProductSku);
+                        <div class="w-28 relative">
+                            <div>
+                                <img class="aspect-square object-contain w-full rounded-md" src="@(product.Content().AncestorOrSelf<RescopeProduct>().Image.Url())" alt="@product.Name" />
+                            </div>
+                            @if (product is IProductVariant variant)
+                            {
+                                <p class="text-sm leading-tight tracking-tight font-bold"><a href="@(variant.Content().AncestorOrSelf<RescopeProduct>().Url())" class="hover:underline">@variant.Parent.Name</a></p>
+                                <p class="text-xs">@variant.Name</p>
+                            }
+                            else
+                            {
+                                <p class="text-sm leading-tight tracking-tight font-bold">@product.Name</p>
+                            }
+                            <a href="@(product.Content().AncestorOrSelf<RescopeProduct>().Url())" class="absolute inset-0"></a>
+                        </div>
+                    }
+                </div>
+
+                <div class="flex">
+                    <a class="bg-indigo-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white ml-auto inline-flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-indigo-600/25 transition-all hover:bg-white hover:text-indigo-600 border border-indigo-600" href="/basket/confirmation/?order=@order.OrderNumber&idHash=@order.GetIdHash()">Open order</a>
+                </div>
+            </div>
+        }
+    }
+</div>

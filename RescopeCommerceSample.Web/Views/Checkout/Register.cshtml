@@ -1,70 +1,70 @@
-﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<CheckoutViewModel<CheckoutRegisterModel>> 
-@using Rescope.Commerce.Web.Models; 
-@using Umbraco.Cms.Web.Website.Controllers 
-@using Umbraco.Extensions 
-@{ 
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<CheckoutViewModel<CheckoutRegisterModel>>
+@using Rescope.Commerce.Web.Models;
+@using Umbraco.Cms.Web.Website.Controllers
+@using Umbraco.Extensions
+@{
     Layout = "Checkout/_Layout";
     var success = TempData["FormSuccess"] != null;
     var registerModel = Model.CheckoutModel.RegisterModel;
 }
 
 @if (success)
-{ 
+{
     <p class="text-success">Registration succeeded.</p>
 }
 else
 {
-    using (Html.BeginUmbracoForm<UmbRegisterController>(
-            "HandleRegisterMember",
-            new
-            {
-                MemberTypeAlias = registerModel.MemberTypeAlias,
-                UsernameIsEmail = registerModel.UsernameIsEmail,
-                RedirectUrl = registerModel.RedirectUrl,
-                AutomaticLogIn = registerModel.AutomaticLogIn
-            }))
+    using (Html.BeginUmbracoForm<CustomRegisterController>(
+    "HandleRegisterMember",
+    new
     {
-        <h2 class="text-2xl mb-2 font-bold">Create a new account</h2> 
-        <div asp-validation-summary="All" class="text-danger"></div>
-        <div class="mb-3 flex flex-row items-center">
-            <label asp-for="@registerModel.Name" class="form-label w-1/4"></label>
-            <input asp-for="@registerModel.Name" class="input flex-1" aria-required="true" placeholder="Full name"/>
-            <span asp-validation-for="@registerModel.Name" class="form-text text-danger"></span>
-        </div>
-        <div class="mb-3 flex flex-row items-center">
-            <label asp-for="@registerModel.Email" class="form-label w-1/4"></label>
-            <input asp-for="@registerModel.Email" class="input flex-1" autocomplete="username" aria-required="true"placeholder="Email address" />
-            <span asp-validation-for="@registerModel.Email" class="form-text text-danger"></span>
-        </div>
-        <div class="mb-3 flex flex-row items-center">
-            <label asp-for="@registerModel.Password" class="form-label w-1/4"></label>
-            <input asp-for="@registerModel.Password" class="input flex-1" autocomplete="new-password" aria-required="true" placeholder="Password"/>
-            <span asp-validation-for="@registerModel.Password" class="form-text text-danger"></span>
-        </div>
-        <div class="mb-3 flex flex-row items-center">
-            <label asp-for="@registerModel.ConfirmPassword" class="form-label w-1/4"></label>
-            <input asp-for="@registerModel.ConfirmPassword" class="input flex-1" autocomplete="new-password" aria-required="true"placeholder="Confirm password" />
-            <span asp-validation-for="@registerModel.ConfirmPassword" class="form-text text-danger"></span>
-        </div>
+        RedirectUrl = registerModel.RedirectUrl
+    }))
+    {
+        <div class="bg-white shadow-md border border-neutral-200 p-4 mb-4">
+            <h2 class="text-xl font-medium text-center">Create an account</h2>
+            <p class="text-md text-center mb-2 opacity-75">Create an account to make managing your orders even easier.</p>
+            <div asp-validation-summary="ModelOnly" class="text-red-600 text-sm"></div>
 
-        @if (registerModel.MemberProperties != null)
-        {
-            for (var i = 0; i < registerModel.MemberProperties.Count; i++)
-            {
-                <div class="mb-3">
-                    @Html.LabelFor(m => registerModel.MemberProperties[i].Value, registerModel.MemberProperties[i].Name)
-                    <input asp-for="@registerModel.MemberProperties[i].Value" class="input flex-1" />
-                    @Html.HiddenFor(m => registerModel.MemberProperties[i].Alias)
-                    <span asp-validation-for="@registerModel.MemberProperties[i].Value" class="form-text text-danger"></span>
+            <div class="flex flex-col sm:flex-row gap-x-4 flex-1">
+                <div class="mb-3 flex flex-1 flex-col">
+                    <label asp-for="@registerModel.FirstName" class="form-label hidden"></label>
+                    <input asp-for="@registerModel.FirstName" class="input flex-1 w-full" aria-required="true" placeholder="First name" />
+                    <span asp-validation-for="@registerModel.FirstName" class="form-text text-red-600 text-sm"></span>
                 </div>
-            }
-        }
+                <div class="mb-3 flex flex-1 flex-col">
+                    <label asp-for="@registerModel.Surname" class="form-label hidden"></label>
+                    <input asp-for="@registerModel.Surname" class="input flex-1 w-full" aria-required="true" placeholder="Last name" />
+                    <span asp-validation-for="@registerModel.Surname" class="form-text text-red-600 text-sm"></span>
+                </div>
+            </div>
+            <div class="mb-3 flex flex-col">
+                <label asp-for="@registerModel.Email" class="form-label hidden"></label>
+                <input asp-for="@registerModel.Email" class="input flex-1 w-full" autocomplete="username" aria-required="true"
+                    placeholder="Email address" />
+                <span asp-validation-for="@registerModel.Email" class="form-text text-red-600 text-sm"></span>
+            </div>
+            <div class="flex flex-col md:flex-row gap-x-4 flex-1">
+                <div class="mb-3 flex flex-1 flex-col">
+                    <label asp-for="@registerModel.Password" class="form-label hidden"></label>
+                    <input asp-for="@registerModel.Password" class="input flex-1 w-full" autocomplete="new-password"
+                        aria-required="true" placeholder="Password" />
+                    <span asp-validation-for="@registerModel.Password" class="form-text text-red-600 text-sm"></span>
+                </div>
+                <div class="mb-3 flex flex-1 flex-col">
+                    <label asp-for="@registerModel.ConfirmPassword" class="form-label hidden"></label>
+                    <input asp-for="@registerModel.ConfirmPassword" class="input flex-1 w-full" autocomplete="new-password"
+                        aria-required="true" placeholder="Confirm password" />
+                    <span asp-validation-for="@registerModel.ConfirmPassword" class="form-text text-red-600 text-sm"></span>
+                </div>
+            </div>
 
-        <div class="flex items-center gap-2">
-            <button type="submit" class="bg-green-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-green-600/25 transition-all hover:bg-white hover:text-green-600 border border-green-600">Register</button>
-
-            <a class="underline" href="@Model.Url()">Or login</a>
+            <div class="flex items-center gap-2">
+                <button type="submit"
+                    class="bg-green-600 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-600 disabled:shadow-none disabled:font-normal text-white flex gap-2 font-bold px-3 py-1.5 rounded shadow-lg shadow-green-600/25 transition-all hover:bg-white hover:text-green-600 border border-green-600">Register</button>
+                <span> or </span>
+                <a class="underline" href="@Model.Url()">login</a>
+            </div>
         </div>
     }
 }
-         

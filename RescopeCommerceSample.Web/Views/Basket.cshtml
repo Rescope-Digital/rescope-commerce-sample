@@ -34,12 +34,22 @@
                         @if (product is IProductVariant variant)
                         {
                             <h1 class="text-2xl font-bold"><a href="@(variant?.Content()?.AncestorOrSelf<RescopeProduct>().Url())" class="hover:underline">@variant.Parent.Name</a></h1>
-                            <h2>@variant.Name</h2>
+                            <h2>
+                                @variant.Name
+                                @if (variant.IsSubscriptionItem)
+                                {
+                                    <span class="bg-blue-600 rounded px-1.5 py-0.5 text-white text-xs">Subscription</span>
+                                }
+                            </h2>
                         }
                         else
                         {
                             <h1 class="text-2xl font-bold">
                                 <a href="@(product?.Content()?.AncestorOrSelf<RescopeProduct>().Url())" class="hover:underline">@product.Name</a>
+                                @if (product.IsSubscriptionItem)
+                                {
+                                    <span class="bg-blue-600 rounded px-1.5 py-0.5 text-white text-xs">Subscription</span>
+                                }
                             </h1>
                         }
 
