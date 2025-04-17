@@ -116,6 +116,18 @@
                             {
                                 <p class="text-sm leading-tight tracking-tight font-bold">@product.Name</p>
                             }
+
+                            @foreach (var field in product.CustomisationFields)
+                            {
+                                if (lineItem.CustomisationFields?.ContainsKey(field.Key) == true)
+                                {
+                                    <div class="leading-none my-1.5">
+                                        <p class="font-bold mb-0.5">@field.Label</p>
+                                        <p>@lineItem.CustomisationFields[field.Key]</p>
+                                    </div>
+                                }
+                            }
+
                             <a href="@(product.Content().AncestorOrSelf<RescopeProduct>().Url())" class="absolute inset-0"></a>
                         </div>
                     }
@@ -150,6 +162,17 @@
                     </div>
 
                     @item.TotalPriceFormatted
+
+                    @foreach (var field in product.CustomisationFields)
+                    {
+                        if (item.CustomisationFields?.ContainsKey(field.Key) == true)
+                        {
+                            <div class="leading-none my-1.5">
+                                <p class="font-bold mb-0.5">@field.Label</p>
+                                <p>@item.CustomisationFields[field.Key]</p>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
         </div>

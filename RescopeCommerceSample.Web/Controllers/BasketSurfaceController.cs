@@ -62,7 +62,11 @@ namespace RescopeCommerceSample.Web.Controllers
             if (product == null)
                 return BadRequest();
 
-            await basket.AddProduct(product, _stockService);
+            var customisationFields = Request.Form
+                .Where(x => x.Key.StartsWith("cf_"))
+                .ToDictionary(x => Guid.Parse(x.Key.Substring(3)), x => x.Value.FirstOrDefault() ?? "");
+
+            await basket.AddProduct(product, _stockService, customisationFields: customisationFields);
             await _basketService.Update(basket);
 
             TempData["addedToBasket"] = CurrentPage?.Id;

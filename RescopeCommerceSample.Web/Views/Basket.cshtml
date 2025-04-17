@@ -53,6 +53,17 @@
                             </h1>
                         }
 
+                        @foreach (var field in product.CustomisationFields)
+                        {
+                            if (item.CustomisationFields?.ContainsKey(field.Key) == true)
+                            {
+                                <div class="leading-none my-1.5">
+                                    <p class="font-bold mb-0.5">@field.Label</p> 
+                                    <p>@item.CustomisationFields[field.Key]</p>
+                                </div>
+                            }
+                        }
+
                         <div class="bg-white border border-neutral-200 inline-flex mt-2 mr-2">
                             <button type="button" class="py-1 px-2 btn_negate hover:text-indigo-600 transition-all">-</button>
                             <input min="0" max="@maxStock" name="product__@product?.Sku" class="quantityinput outline-none appearance-none w-12 px-2 text-center border-neutral-200 border-l border-r" value="@item.Quantity" />
