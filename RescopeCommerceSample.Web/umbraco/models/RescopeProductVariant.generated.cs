@@ -50,6 +50,14 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		// properties
 
 		///<summary>
+		/// Customisation Fields
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.0+a486d5d")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("customisationFields")]
+		public virtual global::System.Collections.Generic.IEnumerable<global::Rescope.Commerce.Core.Models.CustomisationFields> CustomisationFields => this.Value<global::System.Collections.Generic.IEnumerable<global::Rescope.Commerce.Core.Models.CustomisationFields>>(_publishedValueFallback, "customisationFields");
+
+		///<summary>
 		/// Force Shipping Method: Only set this field if you need to force a certain shipping method for this product. You should leave this empty for most products. If empty, Rescope Commerce falls back to the parent product.
 		///</summary>
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.8.0+a486d5d")]
