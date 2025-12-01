@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>104931e6-0900-41f0-a582-d78c764ad606</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Umbraco.Cms" Version="13.9.2" />
-    <PackageReference Include="uSync" Version="13.2.7" />
-    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Square" Version="13.2.15" />
-    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Stripe" Version="13.2.15" />
-    <PackageReference Include="Rescope.Commerce.uSync" Version="13.2.15" />
-    <PackageReference Include="Rescope.Commerce" Version="13.2.15" />
+    <PackageReference Include="Umbraco.Cms" Version="17.0.0" />
+    <PackageReference Include="uSync" Version="17.0.0" />
+    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Square" Version="17.0.3" />
+    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Stripe" Version="17.0.3" />
+    <PackageReference Include="Rescope.Commerce.uSync" Version="17.0.3" />
+    <PackageReference Include="Rescope.Commerce" Version="17.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,12 +42,6 @@
   <PropertyGroup>
     <!-- Razor files are needed for the backoffice to work correctly -->
     <CopyRazorGenerateFilesToPublishDirectory>true</CopyRazorGenerateFilesToPublishDirectory>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- Remove RazorCompileOnBuild and RazorCompileOnPublish when not using ModelsMode InMemoryAuto -->
-    <RazorCompileOnBuild>false</RazorCompileOnBuild>
-    <RazorCompileOnPublish>false</RazorCompileOnPublish>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Umbraco.Web.UI' " />

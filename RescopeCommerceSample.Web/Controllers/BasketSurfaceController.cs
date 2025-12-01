@@ -62,11 +62,18 @@ namespace RescopeCommerceSample.Web.Controllers
             if (product == null)
                 return BadRequest();
 
-            var customisationFields = Request.Form
-                .Where(x => x.Key.StartsWith("cf_"))
-                .ToDictionary(x => Guid.Parse(x.Key.Substring(3)), x => x.Value.FirstOrDefault() ?? "");
+            var customisationFields = Request
+                .Form.Where(x => x.Key.StartsWith("cf_"))
+                .ToDictionary(
+                    x => Guid.Parse(x.Key.Substring(3)),
+                    x => x.Value.FirstOrDefault() ?? ""
+                );
 
-            await basket.AddProduct(product, _stockService, customisationFields: customisationFields);
+            await basket.AddProduct(
+                product,
+                _stockService,
+                customisationFields: customisationFields
+            );
             await _basketService.Update(basket);
 
             TempData["addedToBasket"] = CurrentPage?.Id;
@@ -96,7 +103,7 @@ namespace RescopeCommerceSample.Web.Controllers
                         await basket.SetProductQuantity(
                             product,
                             _stockService,
-                            value.Value.GetValueAs<int>()
+                            int.Parse(value.Value.FirstOrDefault() ?? "0")
                         );
                 }
             }
