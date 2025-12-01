@@ -7,6 +7,12 @@
 This project demonstrates a sample implementation of **Rescope Commerce** for **Umbraco**.
 It provides a functional example of how to set up a Rescope Commerce-powered storefront.
 
+## Umbraco Versions
+
+Rescope Commerce supports all active releases of Umbraco CMS. Check the branches in this repo for other Umbraco versions.
+
+This branch is for Umbraco 13 LTS.
+
 ## Getting Started
 
 Getting up and running is quick and easy:
