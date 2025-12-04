@@ -23,7 +23,7 @@ namespace RescopeCommerceSample.Web.Controllers
     public class CheckoutSurfaceController : SurfaceController
     {
         private readonly IBasketService _basketService;
-        private readonly IOrderService _orderService; 
+        private readonly IOrderService _orderService;
         private readonly IShippingCalculatorService _shippingCalculatorService;
         private readonly IMemberManager _memberManager;
         private readonly ILogger<CheckoutSurfaceController> _logger;
@@ -31,7 +31,7 @@ namespace RescopeCommerceSample.Web.Controllers
         public CheckoutSurfaceController(
             IMemberManager memberManager,
             IUmbracoContextAccessor umbracoContextAccessor,
-            IOrderService orderService, 
+            IOrderService orderService,
             IUmbracoDatabaseFactory databaseFactory,
             ServiceContext services,
             AppCaches appCaches,
@@ -59,7 +59,7 @@ namespace RescopeCommerceSample.Web.Controllers
 
         /// <summary>
         /// Used on the checkout screen to fetch updates about the order status
-        /// </summary> 
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetStatus(int pageId, string order)
         {
@@ -95,23 +95,17 @@ namespace RescopeCommerceSample.Web.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 var member = await _memberManager.GetCurrentMemberAsync();
-                basket.UmbracoMemberKey = member?.Key; 
+                basket.UmbracoMemberKey = member?.Key;
             }
 
             // Check what shipping methods are available. If there is only one method, we'll
             // skip the shipping page and take the user straight to the payment screen.
             var calculations = await _shippingCalculatorService.GetCalculations(basket);
             var skipShipping = false;
-            if (
-                calculations.Count() == 1
-                && (
-                    basket.ShippingMethodId == null
-                    || !calculations.Any(y => y.Method.Id == basket.ShippingMethodId)
-                )
-            )
+            if (calculations.Count() == 1)
             {
                 basket.ShippingMethodId = calculations.First().Method.Id;
-                skipShipping =true;
+                skipShipping = true;
             }
 
             // save the changes we made to the basket
@@ -135,7 +129,7 @@ namespace RescopeCommerceSample.Web.Controllers
 
         /// <summary>
         /// Used in checkout screens to choose a shipping method
-        /// </summary> 
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> UpdateShipping(UpdateShippingMethodRequest checkout)
         {
@@ -144,7 +138,7 @@ namespace RescopeCommerceSample.Web.Controllers
             if (store == null)
                 return BadRequest();
 
-            var basket = await _basketService.GetOrCreateCurrentBasket(store.Id); 
+            var basket = await _basketService.GetOrCreateCurrentBasket(store.Id);
             basket.ShippingMethodId = checkout.Method;
             basket.UmbracoMemberKey = null;
 
@@ -189,11 +183,20 @@ namespace RescopeCommerceSample.Web.Controllers
             basket.PaymentMethodId = checkout.Method;
             basket.UmbracoMemberKey = null;
 
+            // Disable guest checkout IF the user has a subscription item in their basket
+            var products = await _basketService.GetProducts(basket!);
+            var allowGuestCheckout = !products.Any(x => x.IsSubscriptionItem);
+
             // If the user is a logged in member, connect this basket with the umbraco member
             if (User.Identity?.IsAuthenticated == true)
             {
                 var member = await _memberManager.GetCurrentMemberAsync();
                 basket.UmbracoMemberKey = member?.Key;
+            }
+            else if (!allowGuestCheckout)
+            {
+                _logger.LogError("Guest checkout is disabled and the user is not authenticated");
+                return RedirectToCurrentUmbracoPage(new QueryString("?stage=payment"));
             }
 
             try
@@ -212,7 +215,7 @@ namespace RescopeCommerceSample.Web.Controllers
                         basket,
                         CurrentPage!.AncestorOrSelf<Basket>()!.FirstChild<Confirmation>()!
                     );
-                    
+
                     return HandlePaymentResult(order, res);
                 }
                 catch (EmptyOrderException e)
@@ -242,7 +245,7 @@ namespace RescopeCommerceSample.Web.Controllers
             var order = await _orderService.Get(checkout.OrderId);
             order.PaymentMethodId = checkout.Method;
 
-            await _orderService.Update(order); 
+            await _orderService.Update(order);
 
             var res = await _orderService.RetryPayment(
                 order,
@@ -254,8 +257,11 @@ namespace RescopeCommerceSample.Web.Controllers
 
         /// <summary>
         /// Used by this controller to convert Rescope Commerce's InitiatePaymentResult into a IActionResult
-        /// </summary> 
-        protected IActionResult HandlePaymentResult(Order order, InitiatePaymentResult initiatePaymentResult)
+        /// </summary>
+        protected IActionResult HandlePaymentResult(
+            Order order,
+            InitiatePaymentResult initiatePaymentResult
+        )
         {
             switch (initiatePaymentResult.Type)
             {
@@ -266,9 +272,7 @@ namespace RescopeCommerceSample.Web.Controllers
                 // Handle providers that allow us to embed the payment form HTML directly within our own website
                 case ResultType.HTML:
                     // We'll just store the form in ViewData to be used by the cshtml template.
-                    ViewData
-                        .SetOrderId(order.Id)
-                        .SetPaymentHTML(initiatePaymentResult.Html);
+                    ViewData.SetOrderId(order.Id).SetPaymentHTML(initiatePaymentResult.Html);
 
                     return CurrentUmbracoPage();
             }

@@ -69,7 +69,7 @@ namespace RescopeCommerceSample.Web.Controllers
             await basket.AddProduct(product, _stockService, customisationFields: customisationFields);
             await _basketService.Update(basket);
 
-            TempData["addedToBasket"] = CurrentPage?.Id;
+            TempData["addedToBasket"] = productSku;
 
             return RedirectToCurrentUmbracoPage();
         }

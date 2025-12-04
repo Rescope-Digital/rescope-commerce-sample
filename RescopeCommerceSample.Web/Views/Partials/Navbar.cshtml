@@ -1,5 +1,5 @@
 ﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
-@inject IBasketService basketService 
+@inject IBasketService basketService
 @{
     var home = Model.AncestorOrSelf<Home>(1)!;
     var basketPage = home.FirstChild<Basket>();
@@ -10,23 +10,27 @@
 }
 
 <div class="fixed top-0 left-0 z-[100] w-full h-20 bg-white border-b border-neutral-200">
-    <div class="container lg:!max-w-screen-lg mx-auto flex flex-row items-center h-full gap-1">
+    <div class="container lg:!max-w-screen-lg mx-auto flex flex-row items-center h-full gap-1 relative">
         <a href="/" class="mr-6">
             <img src="@home.Logo?.Url()?height=50" class="h-6" />
         </a>
 
         @foreach (var link in home.Navbar)
         {
-            <a href="@link.Url" target="@link.Target" class="hover:text-indigo-600 transition-all h-full px-4 flex items-center relative group">
+            <a href="@link.Url" target="@link.Target"
+                class="hover:text-indigo-600 transition-all h-full px-4 flex items-center relative group">
                 @link.Name
 
-                <div class="group-hover:w-full bottom-0 left-0 w-0 absolute h-1 bg-indigo-600 bg-gradient-to-r from-sky-500/50 transition-all"></div>
+                <div
+                    class="group-hover:w-full bottom-0 left-0 w-0 absolute h-1 bg-indigo-600 bg-gradient-to-r from-sky-500/50 transition-all">
+                </div>
             </a>
         }
 
         @await Html.PartialAsync("CountrySelector")
 
-        @if (isLoggedIn) {
+        @if (isLoggedIn)
+        {
             <a href="@accountPage.Url()" class="relative flex flex-row transition-all hover:text-indigo-600 mr-2">
                 <i class="bi bi-person text-2xl"></i>
             </a>
@@ -36,8 +40,31 @@
             <i class="bi bi-bag text-xl"></i>
             @if (basketCount > 0)
             {
-                <p class="absolute -bottom-0.5 -right-1.5 text-white w-4 h-4 text-[0.625rem] bg-indigo-600 rounded-full flex items-center justify-center">@basketCount</p>
+                <p
+                    class="absolute -bottom-0.5 -right-1.5 text-white w-4 h-4 text-[0.625rem] bg-indigo-600 rounded-full flex items-center justify-center">
+                    @basketCount</p>
             }
         </a>
+        <div id="addedToCartPopup"
+            class="absolute bottom-0 translate-y-full right-0 w-72 p-4  overflow-hidden text-sm leading-tight bg-white border border-neutral-200 shadow-sm rounded-b duration-1000">
+            <p class="mb-2" class="noticeText">Added to your cart</p>
+            <div class="flex flex-row gap-2">
+                <img src="" class="noticeImage w-14 h-14 bg-neutral-50 border border-neutral-100" />
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="font-bold noticeProductName">Product name</p>
+                    <p class="opacity-75 noticeProductSubtext">Quantity</p>
+                </div>
+            </div>
+
+            <a href="@basketPage.Url()"
+                class="btn btn-primary-outline w-full text-center text-base justify-center mt-4">
+                View basket
+            </a>
+
+            <a href="@(basketPage.FirstChild<Checkout>().Url())"
+                class="btn btn-primary w-full text-base text-center justify-center mt-3">
+                Checkout
+            </a>
+        </div>
     </div>
 </div>

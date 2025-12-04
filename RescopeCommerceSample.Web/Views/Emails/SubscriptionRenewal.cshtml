@@ -1,0 +1,49 @@
+﻿@model SubscriptionRenewalEmailTemplate
+@inject IProductStore _productStore;
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+    Hi @Model.Order.BillingAddress?.FirstName,
+</p>
+
+@if (Model.Order.PaymentStatus == PaymentStatus.PAID || Model.Order.PaymentStatus == PaymentStatus.AUTHORISED)
+{
+    <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+        Your subscription was successfully renewed.
+    </p>
+}
+else
+{
+    <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+        Your subscription for <b>@Model.Subscription.TotalPriceFormatted every @Model.Subscription.RecurPeriod</b> is due to
+        renew,
+        however there was an issue with your payment. Your subscription will be cancelled if payment can not be made.
+    </p>
+
+    <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+        Here's a reminder of this subscription:
+    </p>
+
+    @foreach (var lineItem in Model.Order.BasketLineItems)
+    {
+        var product = await _productStore.GetProductOrVariant(lineItem.ProductSku);
+        <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+            @(lineItem.Quantity)x @product?.Name - @lineItem.TotalPriceFormatted
+        </p>
+    }
+
+
+    <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+        Shipping: @Model.Order.TotalShippingPriceFormatted
+    </p>
+    <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+        Tax: @Model.Order.TotalTaxFormatted
+    </p>
+    <p
+        style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px; font-weight: 700;">
+        Total: @Model.Order.TotalPriceFormatted
+    </p>
+
+}
