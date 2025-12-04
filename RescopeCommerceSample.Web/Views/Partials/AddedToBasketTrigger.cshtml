@@ -1,0 +1,14 @@
+@inject IProductStore productStore
+@inject IBasketService basketService
+
+@if (TempData.ContainsKey("addedToBasket"))
+{
+    var product = await productStore.GetProductOrVariant(TempData["addedToBasket"]!.ToString());
+    var basket = await basketService.GetOrCreateCurrentBasket(Html.GetStoreId());
+    TempData.Remove("addedToBasket");
+    <script>
+        openPopup("@product.Name",
+            "@basket.GetProductQuantity(product.Sku) in basket",
+            "@(product.Content().Value<IPublishedContent>("image").Url())");
+    </script>
+}

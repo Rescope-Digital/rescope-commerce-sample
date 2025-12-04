@@ -1,0 +1,41 @@
+﻿@model OrderConfirmationEmailTemplate
+@inject IProductStore _productStore;
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+    Hi @Model.Order.BillingAddress?.FirstName,
+</p>
+
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+    We've successfully received payment for your order <b>@Model.Order.OrderNumber</b>!
+</p>
+
+@foreach (var subscription in Model.Order.CreatedSubscriptionInfos)
+{
+    <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+        You started a subscription for <b>@subscription.TotalPriceFormatted every @subscription.RecurPeriod</b>.
+        You can manage your subscription on our website.
+    </p>
+}
+
+@foreach (var lineItem in Model.Order.BasketLineItems)
+{
+    var product = await _productStore.GetProductOrVariant(lineItem.ProductSku);
+    <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+        @(lineItem.Quantity)x @product?.Name - @lineItem.TotalPriceFormatted
+    </p>
+}
+
+
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+    Shipping: @Model.Order.TotalShippingPriceFormatted
+</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+    Tax: @Model.Order.TotalTaxFormatted
+</p>
+<p
+    style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px; font-weight: 700;">
+    Total: @Model.Order.TotalPriceFormatted
+</p>

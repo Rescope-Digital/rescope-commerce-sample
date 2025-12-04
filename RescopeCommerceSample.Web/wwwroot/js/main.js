@@ -33,14 +33,31 @@ document.querySelectorAll(".btn_negate").forEach((x) => {
   });
 });
 
-// display a toast if server sets addedToBasket
-if (addedToBasket) {
-  Toastify({
-    text: "Added to your basket.",
-    duration: 3000,
-    close: true,
-    gravity: "bottom",
-    position: "right",
-    stopOnFocus: true,
-  }).showToast();
-}
+let currentPopup = 0;
+const openPopup = (name, subtext, img) => {
+  const myId = ++currentPopup;
+
+  const addedToCartPopup = document.getElementById("addedToCartPopup");
+  addedToCartPopup.style.maxHeight = "0px";
+  addedToCartPopup.classList.remove("hidden");
+  addedToCartPopup.classList.add("transition-all", "py-0");
+  addedToCartPopup.clientHeight;
+  addedToCartPopup.style.maxHeight = "250px";
+  addedToCartPopup.classList.remove("py-0");
+
+  addedToCartPopup.querySelector(".noticeImage").src = img;
+  addedToCartPopup.querySelector(".noticeProductName").innerText = name;
+  addedToCartPopup.querySelector(".noticeProductSubtext").innerText = subtext;
+
+  setTimeout(() => {
+    if (currentPopup == myId) {
+      addedToCartPopup.style.maxHeight = "0px";
+      addedToCartPopup.classList.add("py-0");
+      setTimeout(() => {
+        if (currentPopup == myId) {
+          addedToCartPopup.classList.add("hidden");
+        }
+      }, 1000);
+    }
+  }, 5000);
+};
