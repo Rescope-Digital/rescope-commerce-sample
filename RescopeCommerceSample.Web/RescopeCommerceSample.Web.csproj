@@ -9,10 +9,10 @@
   <ItemGroup>
     <PackageReference Include="Umbraco.Cms" Version="17.0.0" />
     <PackageReference Include="uSync" Version="17.0.0" />
-    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Square" Version="17.0.3" />
-    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Stripe" Version="17.0.3" />
-    <PackageReference Include="Rescope.Commerce.uSync" Version="17.0.3" />
-    <PackageReference Include="Rescope.Commerce" Version="17.0.3" />
+    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Square" Version="17.0.6" />
+    <PackageReference Include="Rescope.Commerce.PaymentProcessors.Stripe" Version="17.0.6" />
+    <PackageReference Include="Rescope.Commerce.uSync" Version="17.0.6" />
+    <PackageReference Include="Rescope.Commerce" Version="17.0.6" />
   </ItemGroup>
 
   <ItemGroup>
